@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.webviewtest.App.Companion.cookieManager
 import com.example.webviewtest.databinding.FragmentLoginBinding
 
@@ -14,6 +15,8 @@ class LoginFragment : Fragment() {
 
     private var binding_ : FragmentLoginBinding? = null
     private val binding get() = binding_!!
+
+    private val args: LoginFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,7 +32,11 @@ class LoginFragment : Fragment() {
         binding.etUser.setText("demo@proflota.com")
         binding.etPass.setText("demo123proflota")
         //cookieManager.removeAll()
-
+        var message:String = args.message
+        if( message == "none"){
+            message = ""
+        }
+        binding.tvMessage.setText(message)
         binding.btnLogin.setOnClickListener(View.OnClickListener {
             if( binding.etUser.text.isNotEmpty()){
                 findNavController().navigate(

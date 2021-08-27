@@ -22,6 +22,7 @@ class App : Application() {
     companion object {
         const val baseAPIUrl = "https://proflota.com/"
         const val webViewUrl = "https://proflota.com/"
+        const val webViewUrlHome = "https://proflota.com/home"
         const val cookieStoreName = "myCookies"
         const val username = "userdemo"
 

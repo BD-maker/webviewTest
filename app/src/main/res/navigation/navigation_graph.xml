@@ -13,6 +13,10 @@
         <action
             android:id="@+id/action_loginFragment_to_webFragment"
             app:destination="@id/webFragment" />
+        <argument
+            android:name="message"
+            app:argType="string"
+            android:defaultValue="none" />
     </fragment>
     <fragment
         android:id="@+id/webFragment"
