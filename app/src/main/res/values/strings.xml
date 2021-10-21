@@ -2,4 +2,8 @@
     <string name="app_name">webViewTest</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="user_key">user</string>
+    <string name="pass_key">pass</string>
+    <string name="remember_key">remember</string>
+    <string name="logged_key">logged</string>
 </resources>

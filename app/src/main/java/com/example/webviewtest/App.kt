@@ -1,6 +1,8 @@
 package com.example.webviewtest
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import com.ashokvarma.gander.Gander
 import com.ashokvarma.gander.GanderInterceptor
@@ -23,11 +25,12 @@ class App : Application() {
         const val baseAPIUrl = "https://proflota.com/"
         const val webViewUrl = "https://proflota.com/"
         const val webViewUrlHome = "https://proflota.com/home"
+        const val webViewUrlLogout = "https://proflota.com/logout"
         const val cookieStoreName = "myCookies"
-        const val username = "userdemo"
 
         lateinit var cookieManager: WebKitSyncCookieManager
         lateinit var cookieAPI: CookieAPI
+        lateinit var sharedPref : SharedPreferences
     }
 
     private fun createCookieStore(name: String, persistent: Boolean) = if (persistent) {
@@ -38,6 +41,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
 
         cookieManager = WebKitSyncCookieManager(
             store = createCookieStore(name = cookieStoreName, persistent = true),
