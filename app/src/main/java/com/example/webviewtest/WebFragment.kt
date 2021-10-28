@@ -3,6 +3,7 @@ package com.example.webviewtest
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,7 +19,9 @@ import com.example.webviewtest.App.Companion.cookieManager
 import com.example.webviewtest.databinding.FragmentWebBinding
 import kotlinx.coroutines.*
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import com.example.webviewtest.App.Companion.webViewUrl
+import com.example.webviewtest.App.Companion.webViewUrlHome
 import kotlin.system.exitProcess
 
 
@@ -28,6 +31,7 @@ class WebFragment : Fragment() {
     private val binding get() = binding_!!
     private val args: WebFragmentArgs by navArgs()
     private var logged: Boolean = false
+    private var firstLoading: Boolean = true
     private var exitToast: Toast? = null
 
     override fun onCreateView(
@@ -88,17 +92,23 @@ class WebFragment : Fragment() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
 
+                Log.e("LOG", "Page finish $url ")
+                if (firstLoading){
+                    reloadUrlHome()
+                firstLoading = false
+                }
                 try {
-                    Log.e("LOG", "Page Finished $url ")
-                    if (!logged) {
-                        val cookie = android.webkit.CookieManager.getInstance().getCookie(url)
+                    val cookie = android.webkit.CookieManager.getInstance().getCookie(url)
+                    if (!logged && url == webViewUrlHome) {
                         logged = true
-                        Log.e("LOG", "Cookie guardada [$cookie]")
-                        if( findNavController().currentDestination?.id == R.id.webFragment)
-                            reloadUrlHome()
+//                        if( findNavController().currentDestination?.id == R.id.webFragment)
+//                            reloadUrlHome()
                         binding.pbLoading.isVisible = false
-                    } else {
                         binding.wvWeb.isVisible = true
+                        with(App.sharedPref.edit()) {
+                            putBoolean(getString(R.string.logged_key), true)
+                            apply()
+                        }
                     }
                 } catch (exc: Throwable) {
                     Log.e("LOG", "Android WebKitCookieManager error", exc)
@@ -108,9 +118,8 @@ class WebFragment : Fragment() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
 
                     Log.e("LOG", "Page Started $url ")
-                    if (url == App.webViewUrlLogout ) {
+                    if (url == App.webViewUrlLogout && logged ) {
                         cookieManager.removeAll()
-                        //clearWebView()
                         logged = false
 
                         with(App.sharedPref.edit()) {
@@ -124,29 +133,24 @@ class WebFragment : Fragment() {
                                             "Logged out"
                                     )
                             )
-                    } else if (url == App.webViewUrlHome) {
-                        Log.e("LOG", "Login Correcto")
-
-                        with(App.sharedPref.edit()) {
-                            putBoolean(getString(R.string.logged_key), true)
-                            apply()
-                        }
                     }
                 super.onPageStarted(view, url, favicon)
             }
 
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
 
-                Log.e("LOG", "evaluacion override p/url $url")
+                Log.e("LOG", "override a $url")
                 val override = !logged
                 var message = ""
-                // Aca se detecta si se redirige a .com/ es que perdimos el login
+                // Aca se detecta si se redirige a .com/ es que perdimos el login o fallo login
                 if( url == App.webViewUrl ){
                     cookieManager.removeAll()
                     //clearWebView()
                     if( logged ) {
                         logged = false
                         message = "Logout"
+
                         with (App.sharedPref.edit()) {
                             putBoolean(getString(R.string.logged_key), false )
                             apply()
@@ -155,10 +159,9 @@ class WebFragment : Fragment() {
                         message = "Usuario/Contraseña incorrectos"
                     }
                     if( findNavController().currentDestination?.id == R.id.webFragment) {
-                       // binding.wvWeb.stopLoading()
-
                         findNavController().navigate(WebFragmentDirections.actionWebFragmentToLoginFragment(message))
                     }
+
                 }
                 return override
             }
